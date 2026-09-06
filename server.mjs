@@ -1,4 +1,4 @@
-import { createHash } from 'node:crypto';
+import { createHash, randomBytes } from 'node:crypto';
 import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
 import { extname, join, normalize } from 'node:path';
@@ -10,6 +10,7 @@ const ADMIN_KEY = process.env.ADMIN_KEY || '';
 const types = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.json': 'application/json; charset=utf-8' };
 let currentLiveState = null;
 const clients = new Set();
+const adminTokens = new Set();
 const lanAddresses = Object.values(networkInterfaces()).flat().filter(item => item?.family === 'IPv4' && !item.internal).map(item => item.address);
 const primaryLan = lanAddresses[0] || '未检测到局域网 IPv4';
 
@@ -21,12 +22,15 @@ const encodeFrame = text => {
 };
 const send = (socket, payload) => socket.writable && socket.write(encodeFrame(JSON.stringify(payload)));
 const broadcast = () => clients.forEach(socket => send(socket, { type: 'live-state', payload: currentLiveState }));
+const readJson = req => new Promise((resolve, reject) => { let body = ''; req.on('data', chunk => { body += chunk; if (body.length > 1_000_000) req.destroy(); }); req.on('end', () => { try { resolve(JSON.parse(body || '{}')); } catch { reject(new Error('Invalid JSON')); } }); req.on('error', reject); });
+const json = (res, status, payload) => { res.writeHead(status, { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' }); res.end(JSON.stringify(payload)); };
+const isAdminToken = req => adminTokens.has(String(req.headers.authorization || '').replace(/^Bearer\s+/i, ''));
 const handleMessage = (socket, text) => {
   try {
     const message = JSON.parse(text);
     if (message.type === 'hello') {
       socket.role = message.role;
-      socket.authorized = message.role === 'admin' && (!ADMIN_KEY || message.adminKey === ADMIN_KEY);
+      socket.authorized = message.role === 'admin' && (!ADMIN_KEY || message.adminKey === ADMIN_KEY || adminTokens.has(message.adminToken));
       send(socket, { type: 'admin-auth', payload: { ok: socket.authorized, required: Boolean(ADMIN_KEY) } });
       if (!currentLiveState && socket.authorized && message.role === 'admin' && message.payload?.moments?.length) { currentLiveState = message.payload; broadcast(); }
       send(socket, { type: 'live-state', payload: currentLiveState });
@@ -51,9 +55,12 @@ const consumeFrames = socket => {
   }
 };
 const server = createServer(async (req, res) => {
-  if (req.url?.split('?')[0] === '/health' || req.url?.split('?')[0] === '/network-test') { res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' }); res.end(JSON.stringify({ ok: true, service: 'novel-roast-live' })); return; }
+  const requestPath = req.url?.split('?')[0] || '/';
+  if (requestPath === '/health' || requestPath === '/network-test') { json(res, 200, { ok: true, service: 'novel-roast-live' }); return; }
+  if (requestPath === '/api/admin-auth' && req.method === 'POST') { try { const { adminKey } = await readJson(req); const ok = !ADMIN_KEY || adminKey === ADMIN_KEY; if (!ok) { json(res, 401, { ok: false }); return; } const token = randomBytes(32).toString('base64url'); adminTokens.add(token); json(res, 200, { ok: true, token }); } catch { json(res, 400, { ok: false }); } return; }
+  if (requestPath === '/api/live-state') { if (req.method === 'GET') { json(res, 200, { payload: currentLiveState }); return; } if (req.method === 'POST') { if (!isAdminToken(req)) { json(res, 401, { ok: false }); return; } try { const { payload } = await readJson(req); if (!payload?.moments?.length) { json(res, 400, { ok: false }); return; } currentLiveState = payload; broadcast(); json(res, 200, { ok: true }); } catch { json(res, 400, { ok: false }); } return; } }
   try {
-    const requestPath = req.url.split('?')[0]; const path = requestPath === '/' || !extname(requestPath) ? '/index.html' : requestPath;
+    const path = requestPath === '/' || !extname(requestPath) ? '/index.html' : requestPath;
     const target = normalize(join(root, 'src', path === '/index.html' ? 'index.html' : path.replace(/^\//, '')));
     if (!target.startsWith(join(root, 'src'))) throw new Error('Bad path');
     const content = await readFile(target); res.writeHead(200, { 'Content-Type': types[extname(target)] || 'application/octet-stream' }); res.end(content);
