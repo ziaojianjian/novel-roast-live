@@ -59,13 +59,14 @@ const server = createServer(async (req, res) => {
     const content = await readFile(target); res.writeHead(200, { 'Content-Type': types[extname(target)] || 'application/octet-stream' }); res.end(content);
   } catch { res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' }); res.end('Not found'); }
 });
-server.on('upgrade', (req, socket) => {
+server.on('upgrade', (req, socket, head) => {
   const key = req.headers['sec-websocket-key']; if (!key) { socket.destroy(); return; }
   const accept = createHash('sha1').update(`${key}258EAFA5-E914-47DA-95CA-C5AB0DC85B11`).digest('base64');
   socket.write(`HTTP/1.1 101 Switching Protocols\r\nUpgrade: websocket\r\nConnection: Upgrade\r\nSec-WebSocket-Accept: ${accept}\r\n\r\n`);
-  socket.buffer = Buffer.alloc(0); clients.add(socket);
+  socket.buffer = Buffer.from(head); clients.add(socket);
   socket.on('data', data => { socket.buffer = Buffer.concat([socket.buffer, data]); consumeFrames(socket); });
   socket.on('close', () => clients.delete(socket)); socket.on('error', () => clients.delete(socket));
+  consumeFrames(socket);
 });
 server.listen(PORT, '0.0.0.0', () => {
   console.log(`Novel Roast Console listening on 0.0.0.0:${PORT}`); console.log(`Local: http://localhost:${PORT}`); console.log(`Network: http://${primaryLan}:${PORT}`); console.log(`Phone live: http://${primaryLan}:${PORT}/live`); console.log(`Computer admin: http://${primaryLan}:${PORT}/admin`); console.log(`WebSocket: ws://${primaryLan}:${PORT}`);
