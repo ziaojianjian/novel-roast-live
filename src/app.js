@@ -21,8 +21,8 @@ const getAdminToken = () => sessionStorage.getItem('novel-roast-admin-token') ||
 const refreshLiveState = async () => { try { const response = await fetch('/api/live-state', { cache: 'no-store' }); const { payload } = await response.json(); if (payload?.moments?.length) { state = payload; if (route() === 'live') render(); } } catch {} };
 const startFallbackPolling = () => { if (!fallbackPollTimer && route() === 'live') { refreshLiveState(); fallbackPollTimer = window.setInterval(refreshLiveState, 3000); } };
 const stopFallbackPolling = () => { clearInterval(fallbackPollTimer); fallbackPollTimer = undefined; };
-window.setInterval(() => { if (route() === 'live') refreshLiveState(); }, 3000);
-const publishLiveState = () => { if (!adminAuthorized) return; if (liveSocket?.readyState === WebSocket.OPEN) { liveSocket.send(JSON.stringify({ type: 'live-state', payload: state })); return; } fetch('/api/live-state', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getAdminToken()}` }, body: JSON.stringify({ payload: state }) }).catch(() => {}); };
+window.setInterval(() => { if (route() === 'live') refreshLiveState(); if (route() === 'admin' && adminAuthorized) publishLiveState(); }, 2000);
+const publishLiveState = () => { if (!adminAuthorized) return; fetch('/api/live-state', { method: 'POST', cache: 'no-store', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getAdminToken()}` }, body: JSON.stringify({ payload: state }) }).catch(() => {}); };
 const save = () => { localStorage.setItem(STORE, JSON.stringify(state)); channel?.postMessage(state); publishLiveState(); };
 channel && (channel.onmessage = event => { state = event.data; render(); });
 window.addEventListener('storage', event => { if(event.key === STORE) { state = JSON.parse(event.newValue); render(); } });
