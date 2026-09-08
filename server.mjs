@@ -63,7 +63,7 @@ const server = createServer(async (req, res) => {
     const path = requestPath === '/' || !extname(requestPath) ? '/index.html' : requestPath;
     const target = normalize(join(root, 'src', path === '/index.html' ? 'index.html' : path.replace(/^\//, '')));
     if (!target.startsWith(join(root, 'src'))) throw new Error('Bad path');
-    const content = await readFile(target); res.writeHead(200, { 'Content-Type': types[extname(target)] || 'application/octet-stream' }); res.end(content);
+    const content = await readFile(target); res.writeHead(200, { 'Content-Type': types[extname(target)] || 'application/octet-stream', 'Cache-Control': 'no-store, max-age=0, must-revalidate' }); res.end(content);
   } catch { res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' }); res.end('Not found'); }
 });
 server.on('upgrade', (req, socket, head) => {

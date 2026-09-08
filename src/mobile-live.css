@@ -1,8 +1,8 @@
 @media (max-width: 600px) and (orientation: portrait) {
   .cinema-shell { height: 100svh !important; }
-  .cinema-canvas { width: 100vw !important; height: 100svh !important; padding: 3.2% 4.6% !important; background-position: center !important; }
+  .cinema-canvas { width: 100vw !important; height: 100svh !important; padding: 3.2% 4.6% !important; background-position: center, 52% 50% !important; background-size: auto, 118% auto !important; animation: cinema-hair-motion 14s ease-in-out infinite alternate !important; }
   .cinema-canvas::after { display: none !important; }
-  .cinema-canvas::before { animation: hair-wind-strong 9s ease-in-out infinite alternate !important; transform-origin: 55% 48%; }
+  .cinema-canvas::before { content: none !important; animation: none !important; }
   .cinema-header { position: absolute !important; top: 3.2% !important; left: 4.6% !important; right: 4.6% !important; height: 8% !important; }
   .cinema-hero { position: absolute !important; top: 13% !important; left: 4.6% !important; right: 4.6% !important; height: 31% !important; padding: 0 !important; }
   .cinema-hero h1 { font-size: clamp(30px, 10vw, 48px) !important; line-height: 1.08 !important; margin: 3% 0 !important; }
@@ -15,4 +15,4 @@
   .daai-stage { min-height: 24% !important; }
   .discussion { display: none !important; }
 }
-@keyframes hair-wind-strong { to { transform: scale(1.12) translateX(-5%) translateY(-1.5%); } }
+@keyframes cinema-hair-motion { from { background-position: center, 54% 50%; } to { background-position: center, 46% 48%; } }
