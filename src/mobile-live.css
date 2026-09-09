@@ -1,4 +1,4 @@
-@media (max-width: 600px) and (orientation: portrait) {
+@media (max-width: 600px) and (orientation: portrait), (orientation: landscape) and (max-height: 600px) {
   .cinema-shell { height: 100svh !important; }
   .cinema-canvas { width: 100vw !important; height: 100svh !important; padding: 3.2% 4.6% !important; background-position: center, 52% 50% !important; background-size: auto, 118% auto !important; animation: cinema-hair-motion 14s ease-in-out infinite alternate !important; }
   .cinema-canvas::after { display: none !important; }
@@ -14,5 +14,11 @@
   .fy-score strong { font-size: clamp(38px, 12vw, 60px) !important; }
   .daai-stage { min-height: 24% !important; }
   .discussion { display: none !important; }
+}
+
+@media (orientation: landscape) and (max-height: 600px) {
+  .cinema-canvas {
+    width: calc(100svh * .5625) !important;
+  }
 }
 @keyframes cinema-hair-motion { from { background-position: center, 54% 50%; } to { background-position: center, 46% 48%; } }
