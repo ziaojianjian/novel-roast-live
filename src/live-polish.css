@@ -19,6 +19,30 @@
   text-align-last: justify;
 }
 
+.cinema-hero h1 {
+  color: #fff8e8;
+  -webkit-text-stroke: 1px rgba(50, 31, 30, .7);
+  text-shadow: 0 2px 5px rgba(20, 10, 13, .92), 0 0 16px rgba(20, 10, 13, .48);
+}
+
+.cinema-hero p,
+.moment-label,
+.show-id b,
+.show-id span,
+.show-id small,
+.show-mark {
+  text-shadow: 0 1px 4px rgba(20, 10, 13, .95), 0 0 10px rgba(20, 10, 13, .62);
+}
+
+.cinema-hero p,
+.show-id span {
+  color: #f7e8cc;
+}
+
+.show-id b {
+  color: #fff8e8;
+}
+
 .fy-score {
   background: linear-gradient(145deg, rgba(35, 26, 17, .48), rgba(11, 12, 16, .30)) !important;
   backdrop-filter: blur(2px);
