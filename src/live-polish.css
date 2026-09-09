@@ -28,10 +28,12 @@
   .cinema-canvas {
     background-position: center, 50% 50% !important;
     background-size: cover, cover !important;
+    animation-duration: 13s !important;
+    animation-timing-function: cubic-bezier(.45, 0, .55, 1) !important;
   }
 }
 
 @keyframes cinema-hair-motion {
-  from { background-position: center, 54% 50%; }
-  to { background-position: center, 46% 48%; }
+  from { background-position: center, 58% 52%; }
+  to { background-position: center, 42% 48%; }
 }
