@@ -36,6 +36,20 @@
   animation: cinema-wind-frame 8s ease-in-out infinite;
 }
 
+.cinema-canvas.video-background::before {
+  display: none !important;
+}
+
+.cinema-video-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+}
+
 @media (max-width: 600px) and (orientation: portrait) {
   .cinema-canvas {
     background-position: center, 50% 50% !important;

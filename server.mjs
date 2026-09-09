@@ -7,7 +7,7 @@ import { networkInterfaces } from 'node:os';
 const root = process.cwd();
 const PORT = Number(process.env.PORT) || 5173;
 const ADMIN_KEY = process.env.ADMIN_KEY || '';
-const types = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.json': 'application/json; charset=utf-8' };
+const types = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.json': 'application/json; charset=utf-8', '.mp4': 'video/mp4' };
 let currentLiveState = null;
 const clients = new Set();
 const adminTokens = new Set();
