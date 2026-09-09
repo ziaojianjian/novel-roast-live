@@ -62,3 +62,4 @@ window.addEventListener('keydown',e=>{if(route()==='live'||route()==='preview'){
 const lockLivePortrait=()=>{const orientation=screen.orientation;if(orientation?.lock)orientation.lock('portrait').catch(()=>{});};
 document.addEventListener('fullscreenchange',()=>{if(document.fullscreenElement)lockLivePortrait();});
 document.addEventListener('webkitfullscreenchange',()=>{if(document.webkitFullscreenElement)lockLivePortrait();});
+document.addEventListener('click',async event=>{if(!event.target.closest('#fullscreen-live'))return;event.preventDefault();event.stopImmediatePropagation();const orientation=screen.orientation;try{await orientation?.lock?.('portrait-primary');}catch{}try{await document.querySelector('.cinema-shell')?.requestFullscreen?.({navigationUI:'hide'});await orientation?.lock?.('portrait-primary');}catch{lockLivePortrait();}},true);
